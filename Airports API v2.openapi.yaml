@@ -1,0 +1,248 @@
+openapi: 3.0.1
+info:
+  title: Airports API v2
+  version: '1.0'
+servers:
+  - url: https://api.transavia.com/v2/airports
+paths:
+  /:
+    get:
+      tags:
+        - Airports
+      summary: GetAllAirports
+      description: Retrieve all airports.
+      operationId: 58d8bcb7a9e6240e200cff24
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Server Error
+        '400':
+          description: Bad Request
+  '/{id}':
+    get:
+      tags:
+        - Airports
+      summary: GetAirportsById
+      description: Retrieve airport by id.
+      operationId: 58d8bcb7a9e6240e200cff25
+      parameters:
+        - name: id
+          in: path
+          description: Airport code (3-character IATA code).
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Server Error
+        '400':
+          description: Bad Request
+  '/countrycode/{countryCode}':
+    get:
+      tags:
+        - Airports
+      summary: GetAirportsByCountryCode
+      description: Retrieve airports by country code.
+      operationId: 58d8bcb8a9e6240e200cff26
+      parameters:
+        - name: countryCode
+          in: path
+          description: Comma-separated list of country codes (2-character ISO 3166-1). More than 3 country codes is not allowed.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Server Error
+        '400':
+          description: Bad Request
+  /nearest:
+    get:
+      tags:
+        - Airports
+      summary: GetAirportsByGeoCoordinates
+      description: Retrieve nearest airports by geo coordinates (latitude/longitude).
+      operationId: 58d8bcb8a9e6240e200cff27
+      parameters:
+        - name: latitude
+          in: query
+          description: 'Latitude in decimals, lower than -90.0 and higher than 90.0 is not allowed.'
+          schema:
+            type: string
+        - name: longitude
+          in: query
+          description: 'Longitude in decimals, lower than -180.0 and higher than 180.0 is not allowed.'
+          schema:
+            type: string
+        - name: maxDistanceInKm
+          in: query
+          description: 'Maximum distance in kilometers, lower than 1 and higher than 500 is not allowed. If not set, max value is applied.'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Limits the result, lower than 0 is not allowed. If not set, the result is not limited.'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Server Error
+        '400':
+          description: Bad Request
+  '/nearest/{id}':
+    get:
+      tags:
+        - Airports
+      summary: GetAirportsByAirport
+      description: Retrieve nearest airports by station id.
+      operationId: 58d8bcb8a9e6240e200cff28
+      parameters:
+        - name: id
+          in: path
+          description: Airport (IATA code) to search nearest airports for.
+          required: true
+          schema:
+            type: string
+        - name: maxDistanceInKm
+          in: query
+          description: 'Maximum distance in kilometers, lower than 1 and higher than 500 is not allowed. If not set, max value is applied.'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Limits the result, lower than 0 is not allowed. If not set, the result is not limited.'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '500':
+          description: Server Error
+        '400':
+          description: Bad Request
+components:
+  schemas:
+    AirportDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier.
+        name:
+          type: string
+          description: Name of the airport.
+        city:
+          type: string
+          description: City where the airport is located.
+        country:
+          $ref: '#/components/schemas/CountryDto'
+        geoCoordinates:
+          $ref: '#/components/schemas/GeoCoordinatesDto'
+        self:
+          $ref: '#/components/schemas/Link'
+      description: ''
+    CountryDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Country code.
+        name:
+          type: string
+          description: Name of the country.
+      description: Country.
+    GeoCoordinatesDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          description: Latitude
+          format: double
+        longitude:
+          type: number
+          description: Longitude
+          format: double
+      description: Geo Coordinates
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+    InternalServerErrorResponse:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+        referenceId:
+          type: string
+          format: uuid
+    BadRequestResponse:
+      type: object
+      properties:
+        errorMessages:
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+    AirportDetailsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier.
+        name:
+          type: string
+          description: Name of the airport.
+        city:
+          type: string
+          description: City where the airport is located.
+        country:
+          $ref: '#/components/schemas/CountryDto'
+        geoCoordinates:
+          $ref: '#/components/schemas/GeoCoordinatesDto'
+        outboundRoutes:
+          $ref: '#/components/schemas/Link'
+        inboundRoutes:
+          $ref: '#/components/schemas/Link'
+    NearestAirportDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier.
+        name:
+          type: string
+          description: Name of the airport.
+        city:
+          type: string
+          description: City where the airport is located.
+        country:
+          $ref: '#/components/schemas/CountryDto'
+        geoCoordinates:
+          $ref: '#/components/schemas/GeoCoordinatesDto'
+        distanceInKm:
+          type: integer
+          description: Distance in kilometers.
+          format: int32
+        self:
+          $ref: '#/components/schemas/Link'
+      description: ''
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: apikey
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
